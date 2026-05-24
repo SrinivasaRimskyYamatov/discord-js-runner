@@ -4,7 +4,7 @@ const express = require("express");
 const { Client, GatewayIntentBits } = require("discord.js");
 
 // --------------------
-// Webサーバー（Render対策）
+// Render用Webサーバー（必須）
 // --------------------
 const app = express();
 
@@ -29,6 +29,11 @@ const client = new Client({
 });
 
 const TOKEN = process.env.DISCORD_TOKEN;
+
+if (!TOKEN) {
+  console.error("DISCORD_TOKEN is missing!");
+  process.exit(1);
+}
 
 client.once("ready", () => {
   console.log("Bot起動:", client.user.tag);
