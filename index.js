@@ -1,8 +1,25 @@
 require("dotenv").config();
+
+const express = require("express");
 const { Client, GatewayIntentBits } = require("discord.js");
 
-const TOKEN = process.env.DISCORD_TOKEN;
+// --------------------
+// Webサーバー（Render対策）
+// --------------------
+const app = express();
 
+app.get("/", (req, res) => {
+  res.send("Bot is running!");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Web server running on port", PORT);
+});
+
+// --------------------
+// Discord Bot
+// --------------------
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -11,7 +28,7 @@ const client = new Client({
   ]
 });
 
-client.login(TOKEN);
+const TOKEN = process.env.DISCORD_TOKEN;
 
 client.once("ready", () => {
   console.log("Bot起動:", client.user.tag);
@@ -24,15 +41,9 @@ client.on("messageCreate", (message) => {
 
   const code = message.content.slice(4);
 
-  const result = runJS(code);
-
-  message.reply("```\n" + result + "\n```");
-});
-
-function runJS(code) {
   let logs = [];
-
   const originalLog = console.log;
+
   console.log = (...args) => logs.push(args.join(" "));
 
   try {
@@ -43,5 +54,7 @@ function runJS(code) {
 
   console.log = originalLog;
 
-  return logs.join("\n") || "(no output)";
-}
+  message.reply("```\n" + (logs.join("\n") || "(no output)") + "\n```");
+});
+
+client.login(TOKEN);
